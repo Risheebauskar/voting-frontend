@@ -5,7 +5,14 @@ import Web3 from 'web3';
 import './App.css'; // optional
 
 const contractAddress = "0xA99aF96DD8AE1A26809e1759093AcfC72F2b005E"; // replace with yours
+const ownerAddress = "0xEF8Da394F7DA76f072e512D872CB8b4A92c93816"; // 🛠️ ADD your real deployer/admin address here manually
+
 const abi = [
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
 	{
 		"anonymous": false,
 		"inputs": [
@@ -143,6 +150,19 @@ const abi = [
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "address",
@@ -161,7 +181,7 @@ const abi = [
 		"stateMutability": "view",
 		"type": "function"
 	}
-]; // replace with your ABI
+];
 
 function App() {
   const [web3, setWeb3] = useState(null);
@@ -169,6 +189,7 @@ function App() {
   const [account, setAccount] = useState('');
   const [candidateName, setCandidateName] = useState('');
   const [candidates, setCandidates] = useState([]);
+  const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
     connectWallet();
@@ -184,6 +205,9 @@ function App() {
       setWeb3(web3Instance);
       setAccount(accounts[0]);
       setContract(contractInstance);
+
+      // Check if logged in account is the Owner
+      setIsOwner(accounts[0].toLowerCase() === ownerAddress.toLowerCase());
 
       loadCandidates(contractInstance);
     } else {
@@ -258,9 +282,14 @@ function App() {
               <button onClick={() => voteCandidate(candidate.id)} style={{ marginLeft: '10px' }}>
                 Vote
               </button>
-              <button onClick={() => deleteCandidate(candidate.id)} style={{ marginLeft: '10px', backgroundColor: 'red', color: 'white' }}>
-                Delete
-              </button>
+              {isOwner && (
+                <button
+                  onClick={() => deleteCandidate(candidate.id)}
+                  style={{ marginLeft: '10px', backgroundColor: 'red', color: 'white' }}
+                >
+                  Delete
+                </button>
+              )}
             </div>
           ))
         ) : (
