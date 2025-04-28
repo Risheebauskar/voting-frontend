@@ -2,9 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import Web3 from 'web3';
-import './App.css'; // optional, for styling
+import './App.css'; // optional
 
-const contractAddress = "0x4d1C28909Ffc28C193b117d10D31B18460316e2E"; // <-- paste your deployed contract address
+const contractAddress = "0xA99aF96DD8AE1A26809e1759093AcfC72F2b005E"; // replace with yours
 const abi = [
 	{
 		"anonymous": false,
@@ -24,6 +24,19 @@ const abi = [
 		],
 		"name": "CandidateRegistered",
 		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_candidateId",
+				"type": "uint256"
+			}
+		],
+		"name": "deleteCandidate",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
 	},
 	{
 		"inputs": [
@@ -148,7 +161,7 @@ const abi = [
 		"stateMutability": "view",
 		"type": "function"
 	}
-]; // <-- paste your ABI here
+]; // replace with your ABI
 
 function App() {
   const [web3, setWeb3] = useState(null);
@@ -195,6 +208,14 @@ function App() {
     loadCandidates(contract);
   };
 
+  const deleteCandidate = async (candidateId) => {
+    if (window.confirm(`Are you sure you want to delete candidate ID ${candidateId}?`)) {
+      await contract.methods.deleteCandidate(candidateId).send({ from: account });
+      alert(`Candidate ID ${candidateId} deleted successfully.`);
+      loadCandidates(contract);
+    }
+  };
+
   const loadCandidates = async (contractInstance) => {
     const result = await contractInstance.methods.getCandidates().call();
     const ids = result[0];
@@ -207,7 +228,10 @@ function App() {
       votes: voteCounts[index]
     }));
 
-    setCandidates(candidateList);
+    // Filter out deleted candidates (where id == 0 or name == "")
+    const activeCandidates = candidateList.filter(candidate => candidate.id !== "0" && candidate.name !== "");
+
+    setCandidates(activeCandidates);
   };
 
   return (
@@ -233,6 +257,9 @@ function App() {
               <strong>ID:</strong> {candidate.id} | <strong>Name:</strong> {candidate.name} | <strong>Votes:</strong> {candidate.votes}
               <button onClick={() => voteCandidate(candidate.id)} style={{ marginLeft: '10px' }}>
                 Vote
+              </button>
+              <button onClick={() => deleteCandidate(candidate.id)} style={{ marginLeft: '10px', backgroundColor: 'red', color: 'white' }}>
+                Delete
               </button>
             </div>
           ))
