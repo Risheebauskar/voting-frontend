@@ -1,12 +1,11 @@
-// App.js
-
 import React, { useEffect, useState } from 'react';
 import Web3 from 'web3';
-import './App.css'; // optional
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
+import AdminPage from './pages/AdminPage';
+import VotingPage from './pages/VotingPage';
+import './App.css';
 
-const contractAddress = "0xA99aF96DD8AE1A26809e1759093AcfC72F2b005E"; // replace with yours
-const ownerAddress = "0xEF8Da394F7DA76f072e512D872CB8b4A92c93816"; // 🛠️ ADD your real deployer/admin address here manually
-
+const contractAddress = "0xF1aDF8C88777b4c978965607cB0EB6Ca4d9BD2b9"; 
 const abi = [
 	{
 		"inputs": [],
@@ -181,7 +180,7 @@ const abi = [
 		"stateMutability": "view",
 		"type": "function"
 	}
-];
+] 
 
 function App() {
   const [web3, setWeb3] = useState(null);
@@ -202,17 +201,34 @@ function App() {
       const accounts = await web3Instance.eth.getAccounts();
       const contractInstance = new web3Instance.eth.Contract(abi, contractAddress);
 
+      // Assume owner is the deployer (you must have an owner function)
+      const ownerAddress = await contractInstance.methods.owner().call();
+
       setWeb3(web3Instance);
       setAccount(accounts[0]);
       setContract(contractInstance);
-
-      // Check if logged in account is the Owner
       setIsOwner(accounts[0].toLowerCase() === ownerAddress.toLowerCase());
-
       loadCandidates(contractInstance);
     } else {
       alert('Please install MetaMask!');
     }
+  };
+
+  const loadCandidates = async (contractInstance) => {
+    const result = await contractInstance.methods.getCandidates().call();
+    const ids = result[0];
+    const names = result[1];
+    const voteCounts = result[2];
+
+    const candidateList = ids.map((id, index) => ({
+      id: id,
+      name: names[index],
+      votes: voteCounts[index]
+    }));
+
+    const activeCandidates = candidateList.filter(candidate => candidate.id !== "0" && candidate.name !== "");
+
+    setCandidates(activeCandidates);
   };
 
   const registerCandidate = async () => {
@@ -240,63 +256,47 @@ function App() {
     }
   };
 
-  const loadCandidates = async (contractInstance) => {
-    const result = await contractInstance.methods.getCandidates().call();
-    const ids = result[0];
-    const names = result[1];
-    const voteCounts = result[2];
-
-    const candidateList = ids.map((id, index) => ({
-      id: id,
-      name: names[index],
-      votes: voteCounts[index]
-    }));
-
-    // Filter out deleted candidates (where id == 0 or name == "")
-    const activeCandidates = candidateList.filter(candidate => candidate.id !== "0" && candidate.name !== "");
-
-    setCandidates(activeCandidates);
-  };
-
   return (
-    <div className="App">
-      <h1>Voting DApp</h1>
+    <Router>
+      <div className="App">
+        <h1>Voting DApp</h1>
 
-      <div>
-        <h2>Register Candidate</h2>
-        <input
-          type="text"
-          value={candidateName}
-          onChange={(e) => setCandidateName(e.target.value)}
-          placeholder="Enter candidate name"
-        />
-        <button onClick={registerCandidate}>Register</button>
-      </div>
+        <nav>
+          <Link to="/vote">Vote</Link>
+          {isOwner && (
+            <Link to="/admin" style={{ marginLeft: '10px' }}>Admin</Link>
+          )}
+        </nav>
 
-      <div>
-        <h2>Candidate List</h2>
-        {candidates.length > 0 ? (
-          candidates.map((candidate) => (
-            <div key={candidate.id} style={{ marginBottom: '10px' }}>
-              <strong>ID:</strong> {candidate.id} | <strong>Name:</strong> {candidate.name} | <strong>Votes:</strong> {candidate.votes}
-              <button onClick={() => voteCandidate(candidate.id)} style={{ marginLeft: '10px' }}>
-                Vote
-              </button>
-              {isOwner && (
-                <button
-                  onClick={() => deleteCandidate(candidate.id)}
-                  style={{ marginLeft: '10px', backgroundColor: 'red', color: 'white' }}
-                >
-                  Delete
-                </button>
-              )}
-            </div>
-          ))
-        ) : (
-          <p>Loading candidates...</p>
-        )}
+        <Routes>
+          <Route
+            path="/vote"
+            element={
+              <VotingPage
+                candidates={candidates}
+                voteCandidate={voteCandidate}
+              />
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              isOwner ? (
+                <AdminPage
+                  candidates={candidates}
+                  deleteCandidate={deleteCandidate}
+                  registerCandidate={registerCandidate}
+                  candidateName={candidateName}
+                  setCandidateName={setCandidateName}
+                />
+              ) : (
+                <Navigate to="/vote" replace />
+              )
+            }
+          />
+        </Routes>
       </div>
-    </div>
+    </Router>
   );
 }
 
