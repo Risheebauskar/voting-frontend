@@ -1,13 +1,86 @@
+/* Global Styles */
 body {
+  font-family: 'Arial', sans-serif;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  padding: 0;
+  background-color: #2f3b47; /* Darker background */
+  color: #eceff1; /* Light text */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* A simple container to hold the main content */
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1200px;
+  padding: 40px; /* More padding */
+}
+
+/* Global Links */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Centering Text */
+.text-center {
+  text-align: center;
+}
+
+/* Shadowing for components */
+.shadow-lg {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+.bg-gray-800 {
+  background-color: #34495e;
+}
+
+.bg-gray-700 {
+  background-color: #7f8c8d;
+}
+
+.bg-green-500 {
+  background-color: #2ecc71;
+}
+
+.bg-blue-500 {
+  background-color: #1abc9c;
+}
+
+.bg-red-500 {
+  background-color: #e74c3c;
+}
+
+.text-white {
+  color: white;
+}
+
+/* Focus & Hover Effects */
+input[type="text"]:focus {
+  outline: none;
+  border-color: #f25f4c;
+}
+
+button:hover {
+  cursor: pointer;
+  opacity: 0.9;
+}
+
+/* Styling for spacing and larger paddings */
+section, article, aside {
+  padding: 20px;
+}
+
+h1, h2, h3 {
+  margin-bottom: 20px;
+}
+
+/* More spacing for button focus */
+button:focus {
+  outline: 3px solid #ff6f61;
 }

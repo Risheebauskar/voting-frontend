@@ -3,9 +3,8 @@ import Web3 from 'web3';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import AdminPage from './pages/AdminPage';
 import VotingPage from './pages/VotingPage';
-import './App.css';
 
-const contractAddress = "0xF1aDF8C88777b4c978965607cB0EB6Ca4d9BD2b9"; 
+const contractAddress = "0xF1aDF8C88777b4c978965607cB0EB6Ca4d9BD2b9";
 const abi = [
 	{
 		"inputs": [],
@@ -180,7 +179,7 @@ const abi = [
 		"stateMutability": "view",
 		"type": "function"
 	}
-] 
+];
 
 function App() {
   const [web3, setWeb3] = useState(null);
@@ -201,7 +200,6 @@ function App() {
       const accounts = await web3Instance.eth.getAccounts();
       const contractInstance = new web3Instance.eth.Contract(abi, contractAddress);
 
-      // Assume owner is the deployer (you must have an owner function)
       const ownerAddress = await contractInstance.methods.owner().call();
 
       setWeb3(web3Instance);
@@ -227,7 +225,6 @@ function App() {
     }));
 
     const activeCandidates = candidateList.filter(candidate => candidate.id !== "0" && candidate.name !== "");
-
     setCandidates(activeCandidates);
   };
 
@@ -258,43 +255,64 @@ function App() {
 
   return (
     <Router>
-      <div className="App">
-        <h1>Voting DApp</h1>
+      <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center">
+        {/* Header */}
+        <header className="w-full bg-gray-800 p-6 flex justify-between items-center shadow-md">
+          <h1 className="text-3xl font-bold text-blue-400">Voting DApp</h1>
 
-        <nav>
-          <Link to="/vote">Vote</Link>
-          {isOwner && (
-            <Link to="/admin" style={{ marginLeft: '10px' }}>Admin</Link>
-          )}
-        </nav>
+          <nav className="flex items-center gap-6">
+            <Link
+              to="/vote"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-300"
+            >
+              Vote
+            </Link>
+            {isOwner && (
+              <Link
+                to="/admin"
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition duration-300"
+              >
+                Admin
+              </Link>
+            )}
+          </nav>
+        </header>
 
-        <Routes>
-          <Route
-            path="/vote"
-            element={
-              <VotingPage
-                candidates={candidates}
-                voteCandidate={voteCandidate}
-              />
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              isOwner ? (
-                <AdminPage
+        {/* Main Content */}
+        <main className="w-full p-6 flex-grow">
+          <Routes>
+            <Route
+              path="/vote"
+              element={
+                <VotingPage
                   candidates={candidates}
-                  deleteCandidate={deleteCandidate}
-                  registerCandidate={registerCandidate}
-                  candidateName={candidateName}
-                  setCandidateName={setCandidateName}
+                  voteCandidate={voteCandidate}
                 />
-              ) : (
-                <Navigate to="/vote" replace />
-              )
-            }
-          />
-        </Routes>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                isOwner ? (
+                  <AdminPage
+                    candidates={candidates}
+                    deleteCandidate={deleteCandidate}
+                    registerCandidate={registerCandidate}
+                    candidateName={candidateName}
+                    setCandidateName={setCandidateName}
+                  />
+                ) : (
+                  <Navigate to="/vote" replace />
+                )
+              }
+            />
+          </Routes>
+        </main>
+
+        {/* Footer */}
+        <footer className="w-full bg-gray-800 p-4 text-center text-gray-400 text-sm">
+          Powered by Blockchain © 2025
+        </footer>
       </div>
     </Router>
   );
